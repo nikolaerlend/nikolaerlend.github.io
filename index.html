@@ -1,1 +1,56 @@
-omgomg
+<html> <head> 
+<script type = "text/javascript" src = "jquery.min.js"></script>
+<link rel="shortcut icon" href="hr.png">
+<title>TI KUCAŠ BEBO</title>
+
+<style>
+.center-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 100vh;
+  height: 50px;
+  border: 10px solid black;
+}
+</style>
+</head>
+<div id ="log"></div>
+
+<script type="text/javascript">
+
+	$(document).ready(
+		/*setInterval(*/function() {
+        	var startDate = new Date( Date.now() - 5000 * 60 );
+        	var endDate   = new Date( Date.now() - 4000 * 60 );
+        	var uri = "https://api.fitbit.com/1/user/-/activities/heart/date/today/1d/1sec/time/" + startDate.getHours() + ":" + startDate.getMinutes() +
+                 "/" + endDate.getHours() + ":" + endDate.getMinutes() + ".json";
+            console.log(uri);
+            var request = $.ajax({
+                url: uri,
+                type: "GET",
+                headers: {
+                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkRMMjQiLCJzdWIiOiIzWExIWDUiLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJyc29jIHJhY3QgcnNldCBybG9jIHJ3ZWkgcmhyIHJudXQgcnBybyByc2xlIiwiZXhwIjoxNTUyOTA1MDU3LCJpYXQiOjE1NTIzMDUyNzl9.UFoSzrPAj-TGddYj1uo0RoFBaqlDICYszjzMzxc4Pdc"
+                },
+                dataType: "html"
+            });
+
+            request.done(function(data) {
+            	var json = JSON.parse(data);
+                $("#rate").html(json["activities-heart"][0]["value"]);
+            });
+
+            request.fail(function(jqXHR, textStatus) {
+                console.log( "Request failed: " + textStatus );
+            });
+
+        }/*), 60 * 1000*/);
+
+</script>
+<div class="center-screen">
+<img height ="150px" src= "hr.png" id="heart"/>
+<h1 id="rate"></h1>
+</div> 
+</div>
+</html>
