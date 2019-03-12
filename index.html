@@ -5,13 +5,12 @@
 
 <style>
 .center-screen {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+
+  padding: 10px;
+  width: 50vh;
+  height: 50vh;
   text-align: center;
-  min-height: 100vh;
-  height: 50px;
+  margin: auto;
   border: 10px solid black;
 }
 </style>
@@ -19,38 +18,89 @@
 <div id ="log"></div>
 
 <script type="text/javascript">
+var token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkRMMjQiLCJzdWIiOiIzWExIWDUiLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJyc29jIHJhY3QgcnNldCBybG9jIHJ3ZWkgcmhyIHJwcm8gcm51dCByc2xlIiwiZXhwIjoxNTUyOTA1MDU2LCJpYXQiOjE1NTIzMjAxODF9.eX8SVeVRxpLkuEtalHkKhB6bhCpC9eX9QjVv7sZrZ8w";
 
-	$(document).ready(
-		/*setInterval(*/function() {
-        	var startDate = new Date( Date.now() - 5000 * 60 );
-        	var endDate   = new Date( Date.now() - 4000 * 60 );
-        	var uri = "https://api.fitbit.com/1/user/-/activities/heart/date/today/1d/1sec/time/" + startDate.getHours() + ":" + startDate.getMinutes() +
-                 "/" + endDate.getHours() + ":" + endDate.getMinutes() + ".json";
+$( document ).ready(function() {
+
+    function checkHR() {
+          
+          var startDate = new Date( Date.now() - 2000 * 60 );
+          var endDate   = new Date( Date.now() - 1000 * 60 );
+
+          var uri = "https://api.fitbit.com/1/user/-/activities/heart/date/today/1d/1sec/time/" + startDate.getHours().toString().replace(/^(\d)$/, '0$1') + ":" + startDate.getMinutes().toString().replace(/^(\d)$/, '0$1') +
+                 "/" + endDate.getHours().toString().replace(/^(\d)$/, '0$1') + ":" + endDate.getMinutes().toString().replace(/^(\d)$/, '0$1') + ".json";
             console.log(uri);
             var request = $.ajax({
                 url: uri,
+                timeout: 100000,
                 type: "GET",
                 headers: {
-                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkRMMjQiLCJzdWIiOiIzWExIWDUiLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJyc29jIHJhY3QgcnNldCBybG9jIHJ3ZWkgcmhyIHJudXQgcnBybyByc2xlIiwiZXhwIjoxNTUyOTA1MDU3LCJpYXQiOjE1NTIzMDUyNzl9.UFoSzrPAj-TGddYj1uo0RoFBaqlDICYszjzMzxc4Pdc"
+                    "Authorization": token
                 },
                 dataType: "html"
             });
 
             request.done(function(data) {
-            	var json = JSON.parse(data);
-                $("#rate").html(json["activities-heart"][0]["value"]);
+              var json = JSON.parse(data);
+              var rate = parseInt(json["activities-heart"][0]["value"], 10);
+              $("#rate").html(rate);
+              setTimeout(function(){checkHR();}, 10000);
             });
 
             request.fail(function(jqXHR, textStatus) {
                 console.log( "Request failed: " + textStatus );
             });
 
-        }/*), 60 * 1000*/);
+   }
+
+  function checkSleep() {
+
+        var day = new Date();
+        var date = day.getFullYear() + "-" + parseInt((day.getMonth()+1)).toString().replace(/^(\d)$/, '0$1') + "-" + (day.getDate()-1);
+
+          var uri = "https://api.fitbit.com/1.2/user/-/sleep/date/"+date+".json";
+            var request = $.ajax({
+                url: uri,
+                timeout: 100000,
+                type: "GET",
+                headers: {
+                    "Authorization": token
+                },
+                dataType: "html"
+            });
+
+            request.done(function(data) {
+              var json = JSON.parse(data);
+              console.log(json);
+              var sleep = parseFloat(json["summary"]["totalMinutesAsleep"], 2)/60;
+              var sleep = sleep.toFixed(2);
+
+              $("#sleep").html("Slept for: " + sleep +" hours.");
+              setTimeout(function(){checkHR();}, 10000);
+            });
+
+            request.fail(function(jqXHR, textStatus) {
+                console.log( "Request failed: " + textStatus );
+            });
+
+   
+
+    
+}
+    checkSleep();
+    checkHR();  
+
+});
+
 
 </script>
+<div>
 <div class="center-screen">
 <img height ="150px" src= "hr.png" id="heart"/>
 <h1 id="rate"></h1>
+<h1 id="sleep"></h1>
 </div> 
 </div>
+</div>
 </html>
+
